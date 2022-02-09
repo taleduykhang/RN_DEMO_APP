@@ -1,41 +1,77 @@
 /* eslint-disable react-native/no-inline-styles */
-import axios from 'axios';
 import React, {useEffect, useState} from 'react';
-import {Dimensions, StyleSheet, Text, View} from 'react-native';
-import RadioForm from 'react-native-simple-radio-button';
-import {Defs, LinearGradient, Stop} from 'react-native-svg';
+import {StyleSheet, Text, View, Dimensions} from 'react-native';
 import {
-  VictoryArea,
-  VictoryAxis,
   VictoryBar,
   VictoryChart,
-  VictoryLabel,
-  VictoryLegend,
-  VictoryPie,
-  VictoryStack,
+  VictoryArea,
+  VictoryLine,
   VictoryTheme,
+  VictoryLabel,
+  VictoryAxis,
+  VictoryPie,
   VictoryTooltip,
+  VictoryLegend,
+  VictoryVoronoiContainer,
 } from 'victory-native';
-import data from './data.json';
-import dataGroup from './dataGroup.json';
+import Svg, {Defs, G, LinearGradient, Stop} from 'react-native-svg';
+import RadioForm from 'react-native-simple-radio-button';
+import axios from 'axios';
 const {width} = Dimensions.get('window');
 
 const colorArray = [
-  '#b34700',
-  '#cc5200',
-  '#e65c00',
   '#FF6633',
-  '#ff751a',
-  '#ff8533',
-  '#ff944d',
-  '#ffa366',
-  '#ffb380',
-  '#ffc299',
-  '#ffd1b3',
-  '#ffe0cc',
-  '#fff0e6',
+  '#FFB399',
+  '#FF33FF',
+  '#FFFF99',
+  '#00B3E6',
+  '#E6B333',
+  '#3366E6',
+  '#999966',
+  '#99FF99',
+  '#B34D4D',
+  '#80B300',
+  '#809900',
+  '#E6B3B3',
+  '#6680B3',
+  '#66991A',
+  '#FF99E6',
+  '#CCFF1A',
+  '#FF1A66',
+  '#E6331A',
+  '#33FFCC',
+  '#66994D',
+  '#B366CC',
+  '#4D8000',
+  '#B33300',
+  '#CC80CC',
+  '#66664D',
+  '#991AFF',
+  '#E666FF',
+  '#4DB3FF',
+  '#1AB399',
+  '#E666B3',
+  '#33991A',
+  '#CC9999',
+  '#B3B31A',
+  '#00E680',
+  '#4D8066',
+  '#809980',
+  '#E6FF80',
+  '#1AFF33',
+  '#999933',
+  '#FF3380',
+  '#CCCC00',
+  '#66E64D',
+  '#4D80CC',
+  '#9900B3',
+  '#E64D66',
+  '#4DB380',
+  '#FF4D4D',
+  '#99E6E6',
+  '#6666FF',
 ];
-const colorArray2 = ['#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
+
 var radio_props = [
   {label: 'Bar', value: 0},
   {label: 'Line', value: 1},
@@ -90,6 +126,13 @@ const App = () => {
 
   const stops = genStops();
 
+  // if you want colors for gradient to be static, replace {stops} inside <LinearGradient> with
+  // <Stop offset="0%" stopColor="red"/>
+  // <Stop offset="25%" stopColor="orange"/>
+  // <Stop offset="50%" stopColor="gold"/>
+  // <Stop offset="75%" stopColor="yellow"/>
+  // <Stop offset="100%" stopColor="green"/>
+
   //format number decimal places
   const formatNumber = (num: any) => {
     return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
@@ -97,182 +140,49 @@ const App = () => {
   const sumPopulations = (arr: any) => {
     let sum = 0;
     for (let i = 0; i < arr?.length; i++) {
-      if (chart === 3) {
-        sum += arr[i]?.Population;
-      } else {
-        sum += arr[i]?.value;
-      }
+      sum += arr[i]?.Population;
     }
-    return sum / arr?.length;
+    return sum;
   };
-  const data1 = {
-    data: [
-      {
-        x: 'T2',
-        value: 100,
-      },
-      {
-        x: 'T3',
-        value: 100,
-      },
-      {
-        x: 'T4',
-        value: 100,
-      },
-      {
-        x: 'T5',
-        value: 100,
-      },
-      {
-        x: 'T6',
-        value: 100,
-      },
-      {
-        x: 'T7',
-        value: 100,
-      },
-      {
-        x: 'CN',
-        value: 100,
-      },
-    ],
-  };
-  const getBarData = () => {
-    return dataGroup.map(dat => {
-      return [
-        {x: 'TK cơ bản', y: dat.value, label1: dat.x},
-        {x: 'TK tích lũy', y: dat.value * 2.3, label1: dat.x},
-      ];
-    });
-  };
+
   var MyChart = (
-    <VictoryChart
-      // theme={VictoryTheme.material}
-      domainPadding={{x: 30}}
-      // domain={[0, 100]}
-    >
-      {/* GRADIENT FOR VictoryArea */}
-      <Defs>
-        <LinearGradient id="gradientStroke" x1="0%" y1="0%" x2="0%" y2="100%">
-          {stops}
-        </LinearGradient>
-      </Defs>
-      <VictoryAxis
-        dependentAxis
-        tickFormat={tick => `${tick}%`}
-        style={{
-          axis: {stroke: 'transparent'},
-          ticks: {stroke: 'transparent'},
-        }}
-      />
-
-      <VictoryAxis
-        tickFormat={['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']}
-        style={{
-          axis: {stroke: 'transparent'},
-          ticks: {stroke: 'transparent'},
-        }}
-      />
-
-      <Text style={{color: '#FF6633', fontSize: 24, fontWeight: 'bold'}}>
-        Trung bình:
-        {Math.round(sumPopulations(data?.data) * 10) / 10}%
-      </Text>
-
-      <VictoryBar
-        data={data?.data}
-        x="x"
-        y="value"
-        animate={{
-          duration: 2000,
-          onLoad: {duration: 1000},
-        }}
-        alignment="middle"
-        cornerRadius={{top: 10, bottom: 10}}
-        style={{
-          data: {
-            fill: 'url(#gradientStroke)',
-            fillOpacity: 0.7,
-            // stroke: 'url(#gradientStroke)',
-            strokeWidth: 1,
-            border: 0,
-          },
-        }}
-        // labels={({datum}) => `${datum.value}`}
-        // labelComponent={<VictoryLabel angle={0} verticalAnchor="middle" />}
-      />
-      <VictoryBar
-        data={data1.data}
-        x="x"
-        y="value"
-        animate={{
-          duration: 2000,
-          onLoad: {duration: 1000},
-        }}
-        alignment="middle"
-        cornerRadius={{top: 10, bottom: 10}}
-        style={{
-          data: {
-            fill: '#d1d1e0',
-            fillOpacity: 0.2,
-            // stroke: 'url(#gradientStroke)',
-            strokeWidth: 1,
-            border: 0,
-          },
-        }}
-        // labels={({datum}) => `${datum.value}`}
-        // labelComponent={<VictoryLabel angle={0} verticalAnchor="middle" />}
-      />
-    </VictoryChart>
+    <VictoryBar
+      data={chartData}
+      x="State"
+      y="Population"
+      animate={{
+        duration: 2000,
+        onLoad: {duration: 1000},
+      }}
+      alignment="middle"
+      style={{
+        data: {fill: 'red', border: 0},
+      }}
+      labels={({datum}) => `${datum.Population}`}
+      labelComponent={
+        <VictoryLabel angle={90} verticalAnchor="start" textAnchor="end" />
+      }
+    />
   );
 
   if (chart === 1) {
     MyChart = (
-      <>
-        <VictoryChart theme={VictoryTheme.material} domainPadding={{x: 100}}>
-          <VictoryAxis
-            style={{
-              axis: {stroke: 'transparent'},
-              ticks: {stroke: 'transparent'},
-            }}
-          />
-
-          <VictoryStack
-            colorScale={colorArray2}
-            style={{
-              data: {stroke: 'white', strokeWidth: 3},
-            }}>
-            {getBarData().map((dat, index) => {
-              return (
-                <VictoryBar
-                  key={index}
-                  data={dat}
-                  labels={({datum}) => `${Math.round(datum.y / 10)}`}
-                  labelComponent={<VictoryTooltip />}
-                  style={{labels: {fill: 'black'}}}
-                  animate={{
-                    duration: 2000,
-                    onLoad: {duration: 1000},
-                  }}
-                />
-              );
-            })}
-          </VictoryStack>
-          <VictoryLegend
-            x={0}
-            y={0}
-            centerTitle
-            title="Chú thích"
-            orientation="vertical"
-            gutter={20}
-            style={{border: {stroke: 'black'}, title: {fontSize: 20}}}
-            colorScale={colorArray2}
-            data={getBarData().map((abc: any) => ({
-              name: abc[0]?.label1,
-            }))}
-          />
-        </VictoryChart>
-      </>
+      <VictoryLine
+        data={chartData}
+        x="State"
+        y="Population"
+        animate={{
+          onLoad: {duration: 1000},
+          duration: 1000,
+          easing: 'bounce',
+        }}
+        style={{
+          data: {
+            stroke: 'purple',
+            strokeWidth: 3,
+          },
+        }}
+      />
     );
   } else if (chart === 2) {
     MyChart = (
@@ -358,7 +268,32 @@ const App = () => {
 
   return (
     <View style={styles.container}>
-      {MyChart}
+      {chart === 3 ? (
+        MyChart
+      ) : (
+        <VictoryChart theme={VictoryTheme.material} domainPadding={10}>
+          {/* GRADIENT FOR VictoryArea */}
+          <Defs>
+            <LinearGradient id="gradientStroke">{stops}</LinearGradient>
+          </Defs>
+          {/* <VictoryAxis
+          dependentAxis
+          animate={{
+            duration: 2000,
+            easing: 'bounce',
+          }}
+        />
+        <VictoryAxis
+          crossAxis
+          // width={400}
+          // theme={VictoryTheme.material}
+          // offsetX={100}
+          // standalone={false}
+        /> */}
+
+          {MyChart}
+        </VictoryChart>
+      )}
       <View style={{position: 'absolute', bottom: 10}}>
         <RadioForm
           radio_props={radio_props}
